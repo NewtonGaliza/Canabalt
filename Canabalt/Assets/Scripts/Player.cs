@@ -5,7 +5,22 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private float gravity;
-    private Vector2 velocity;
+    private Vector2 _velocity;
+    public Vector2 velocity
+    {
+        get { return _velocity; }
+        set { _velocity = value; }
+    }
+    private float acceleration = 10;
+    private float maxAcceleration = 10;
+    private float maxXVelocity = 100;
+    private float _distance;
+    public float distance
+    {
+        get { return _distance; }
+        set { _distance = value; }
+    }
+
     [SerializeField] private float groundHeight;
     [SerializeField] private bool isGrounded = false;
     [SerializeField] private float jumpVelocity;
@@ -37,7 +52,7 @@ public class Player : MonoBehaviour
             if(Input.GetKeyDown(KeyCode.Space))
             {
                 isGrounded = false;
-                velocity.y = jumpVelocity;
+                _velocity.y = jumpVelocity;
                 isHoldingJump = true;
                 holdJumpTimer = 0;
             }
@@ -68,7 +83,7 @@ public class Player : MonoBehaviour
 
             if(!isHoldingJump)
             {
-                velocity.y += gravity * Time.fixedDeltaTime;
+                _velocity.y += gravity * Time.fixedDeltaTime;
             }
 
             if(pos.y <= groundHeight)
@@ -77,6 +92,24 @@ public class Player : MonoBehaviour
                 isGrounded = true;
             }
         }
+
+
+        distance += velocity.x * Time.fixedDeltaTime;
+
+        if(isGrounded)
+        {
+            float velocityRatio = velocity.x / maxXVelocity;
+
+            acceleration = maxAcceleration * (1 - velocityRatio);
+
+            _velocity.x += acceleration * Time.fixedDeltaTime;            
+
+            if(velocity.x >= maxXVelocity)
+            {
+                _velocity.x = maxXVelocity;
+            }
+        }
+
 
         transform.position = pos;
     }
